@@ -2,7 +2,7 @@ package log
 
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{Encoders, Row, SparkSession}
-import reader.model.QueryParamsConfig
+import reader.json.model.QueryParamsConfig
 
 import java.time.{Duration, LocalDateTime}
 import java.time.format.DateTimeFormatter

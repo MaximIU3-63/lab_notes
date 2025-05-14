@@ -1,6 +1,6 @@
 package reader.json
 
-import reader.utils.{FileType, ResourceReader}
+import reader.json.utils.{FileType, ResourceReader}
 
 import scala.io.Source
 import scala.util.{Try, Using}

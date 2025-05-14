@@ -1,4 +1,4 @@
-package reader.model
+package reader.json.model
 
 case class QueryParamsConfig(
                               common_params: Map[String, String],

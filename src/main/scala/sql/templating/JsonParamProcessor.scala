@@ -1,6 +1,7 @@
-package reader.json
+package sql.templating
 
-import reader.model.QueryParamsConfig
+import reader.json.JsonUtils
+import reader.json.model.QueryParamsConfig
 
 import scala.util.Try
 

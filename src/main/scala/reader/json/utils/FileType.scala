@@ -1,6 +1,6 @@
-package reader.utils
+package reader.json.utils
 
 // Интерфейс для чтения ресурсов
-private[reader] trait FileType {
+private[sql] trait FileType {
   val extension: String
 }

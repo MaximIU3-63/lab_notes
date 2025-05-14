@@ -1,7 +1,8 @@
 import log.QueryLogger
 import org.apache.spark.sql.SparkSession
-import reader.json.{JsonParamProcessor, JsonReader}
-import reader.model.QueryParamsConfig
+import reader.json.JsonReader
+import reader.json.model.QueryParamsConfig
+import sql.templating.JsonParamProcessor
 
 import scala.util.{Failure, Success, Try}
 
