@@ -1,14 +1,15 @@
 {
   "common_params": {
     "{db_name}": "production",
-    "{schema}": "public"
+    "{limit}": "100"
   },
   "query_specific_params": {
     "get_users": {
-      "{status}": "active",
-      "{limit}": "100"
+      "{schema}": "users",
+      "{status}": "active"
     },
     "get_orders": {
+      "{schema}": "orders",
       "{status}": "active",
       "{date}": "2024-01-01"
     }

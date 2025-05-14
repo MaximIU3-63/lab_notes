@@ -22,13 +22,13 @@ object Main {
     val sqlTemplates = Seq(
       Map(
         "get_users" -> """
-                         |SELECT * FROM {db_name}.{schema}.users
+                         |SELECT * FROM {db_name}.{schema}
                          |      WHERE status = '{status}'
                          |      LIMIT {limit}
                          |""".stripMargin,
         "get_orders" ->
           """
-            |SELECT * FROM {db_name}.{schema}.orders
+            |SELECT * FROM {db_name}.{schema}
             |      WHERE status = '{status}' and date = '{date}'
             |""".stripMargin
       )
