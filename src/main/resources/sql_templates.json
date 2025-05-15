@@ -3,6 +3,9 @@
     "{db_name}": "production",
     "{limit}": "100"
   },
+  "dynamic_params": {
+    "{min_date}": "(select min(date) from table)"
+  },
   "query_specific_params": {
     "get_users": {
       "{schema}": "users",

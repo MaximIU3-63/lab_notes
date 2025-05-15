@@ -17,7 +17,6 @@ private object JsonReaderInstance {
       Using(Source.fromResource(s"$resource.json"))(_.mkString)
     }
   }
-
 }
 
 // Реализация JsonReader

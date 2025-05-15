@@ -1,10 +1,9 @@
-import log.QueryLogger
 import org.apache.spark.sql.SparkSession
 import reader.json.JsonReader
-import reader.json.model.QueryParamsConfig
+import sql.SqlProcessor
 import sql.templating.JsonParamProcessor
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -15,15 +14,12 @@ object Main {
 
     spark.sparkContext.setLogLevel("WARN")
 
-    // Initialize the logger
-    val queryLogger = new QueryLogger(spark)
-
     // Sample SQL templates
     val sqlTemplates = Seq(
       Map(
         "get_users" -> """
                          |SELECT * FROM {db_name}.{schema}
-                         |      WHERE status = '{status}'
+                         |      WHERE status = '{status}' and date = @min_date@
                          |      LIMIT {limit}
                          |""".stripMargin,
         "get_orders" ->
@@ -35,7 +31,7 @@ object Main {
     )
 
     // Read JSON from /resources
-    val jsonContent = new JsonReader().readJson("sql_templates") match {
+    val jsonContent: String = new JsonReader().readJson("sql_templates") match {
       case Success(content) => content
       case Failure(e) => throw e
     }
@@ -46,26 +42,6 @@ object Main {
       case Failure(e) => throw e
     }
 
-    // Validate and replace parameters in SQL templates
-    sqlTemplates.foreach { map =>
-      map.foreach { case (queryId, sqlTemplate) =>
-        val logState = queryLogger.startLogging(queryId)
-        Try {
-          val sql = JsonParamProcessor.replaceWithValidation(jsonConfig, queryId, sqlTemplate) match {
-            case Right(sql) => sql
-            case Left(e) => throw new Exception(e)
-          }
-
-          println(sql)
-        } match {
-          case Success(_) =>
-            queryLogger.endLogging(logState, "SUCCESS", "Query executed successfully")
-          case Failure(e) =>
-            queryLogger.endLogging(logState, "FAILED", s"Query failed with error: ${e.getMessage}")
-        }
-      }
-    }
-
-    queryLogger.writeLog()
+    SqlProcessor(spark).process(sqlTemplates, jsonConfig)
   }
 }
