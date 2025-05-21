@@ -2,23 +2,17 @@ package load
 
 import load.WriterConfig.WriterConfig
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.apache.spark.sql.{SaveMode, SparkSession}
+
+trait Format {
+  def name: String
+}
+
+object Format {
+  case object Parquet extends Format { val name = "parquet" }
+}
 
 object WriterConfig {
-
-  // Надёжный тип вместо строки
-  trait Format {
-    def name: String
-  }
-
-  object Format {
-    case object Parquet extends Format { val name = "parquet" }
-
-    def fromString(str: String): Format = str.toLowerCase match {
-      case "parquet" => Parquet
-      case other     => throw new IllegalArgumentException(s"Unsupported format: $other")
-    }
-  }
 
   // Конфигурация записи
   final case class WriterConfig(

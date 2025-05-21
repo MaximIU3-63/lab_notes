@@ -37,23 +37,27 @@ object Main {
     // 5. Объект модуля записи результата
     val writer = HiveDataFrameWriter
 
-    // Read JSON from /resources
+    // Считывание JSON конфигурации
     val jsonContent: String = new JsonReader().readJson("sql_templates")
 
-    // Parse JSON configuration
+    // Парсинг JSON конфигурации
     val jsonConfig = JsonConfigLoader.loadConfig(jsonContent)
 
+    // 6. Объект модуля логирования
     val logger = new QueryLogger(spark)
 
-    SQLProcessor(
+    // Обработка запросов
+    val engine = SQLProcessor(
       spark = spark,
       jsonConfig = jsonConfig,
       validator = validator,
       replacer = sqlParameterReplacer,
       executor = sqlProcessor,
       writer = writer,
-      logger = logger // Replace with actual logger if needed
-    ).process(queriesConfig)
+      logger = logger
+    )
+
+    engine.process(queriesConfig)
 
     // 1. Считывание из области хранения
     //cpId: 1 -> groupId: akb, chatbot, cc, jipr

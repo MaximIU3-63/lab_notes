@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
-// This object provides a utility for JSON serialization and deserialization using Jackson.
+// Объект JsonUtils для работы с JSON
 object JsonUtils {
   val mapper: ObjectMapper = {
     val m = new ObjectMapper()

@@ -1,12 +1,11 @@
 package sql
 
 import extract.model.QueryTaskConfig
-import load.WriterConfig.Format.Parquet
 import org.apache.spark.sql.SparkSession
 import sql.templating.ParameterReplacer
 import sql.validation.SQLValidator
 import transform.SQLExecutor
-import load.{DataFrameWriter, WriterConfig}
+import load.DataFrameWriter
 import log.QueryLogger
 import reader.json.model.SQLTemplatesConfig
 import utils.errorhandling.ErrorCollector
