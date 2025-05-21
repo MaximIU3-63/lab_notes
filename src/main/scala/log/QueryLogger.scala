@@ -1,16 +1,17 @@
 package log
 
+import log.DateUtils.{dateFormatter, dateTimeFormatter}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{Encoders, Row, SparkSession}
-import reader.json.model.QueryParamsConfig
 
-import java.time.{Duration, LocalDateTime}
+import java.time.{LocalDateTime, ZoneOffset}
 import java.time.format.DateTimeFormatter
 import scala.collection.mutable.ListBuffer
 import scala.util.{Failure, Success, Try}
 
 sealed case class LogState(
                             queryId: String,
+                            groupId: String,
                             sources: String,
                             startDate: String,
                             appId: String,
@@ -20,6 +21,7 @@ sealed case class LogState(
 case class QueryLog(
                      appId: String,
                      queryId: String,
+                     groupId: String,
                      appName: String,
                      startDate: String,
                      endDate: String,
@@ -30,38 +32,23 @@ case class QueryLog(
                      duration: String
                    )
 
-// This class is responsible for logging the queries executed in Spark.
-class QueryLogger(spark: SparkSession) {
+object DateUtils {
+  val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+  val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+}
 
-  private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-  private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+// This class is responsible for logging the queries executed in Spark.
+class QueryLogger(spark: SparkSession) extends Serializable {
 
   private val queryLogs = ListBuffer.empty[QueryLog]
 
-  // This method returns the current date in a specific format.
-  private def currentDate: String =
-    LocalDateTime.now().format(dateFormatter)
-
-  // This method returns the current date and time in a specific format.
-  private def currentDateTime: String =
-    LocalDateTime.now().format(dateTimeFormatter)
+  // Форматированное время
+  private def formatTime(time: Long): String = LocalDateTime.ofEpochSecond(time / 1000, 0, ZoneOffset.UTC).format(dateTimeFormatter)
+  private def formatDate(time: Long): String = LocalDateTime.ofEpochSecond(time / 1000, 0, ZoneOffset.UTC).format(dateFormatter)
 
   // This method adds a log entry to the list of query logs.
   private def addLog(log: QueryLog): Unit =
     queryLogs += log
-
-  // This method calculates the duration between two timestamps.
-  private def calculateDuration(start: String, end: String): String = {
-    val startTime = LocalDateTime.parse(start, dateTimeFormatter)
-    val endTime = LocalDateTime.parse(end, dateTimeFormatter)
-    val duration = Duration.between(startTime, endTime)
-
-    val hours = duration.toHours
-    val minutes = duration.toMinutes % 60
-    val seconds = duration.getSeconds % 60
-
-    s"$hours ч $minutes м $seconds с"
-  }
 
   // This method extracts the source tables from the query.
   private def extractSourceTables(query: String): Seq[String] = {
@@ -76,35 +63,48 @@ class QueryLogger(spark: SparkSession) {
     }
   }
 
-  // This method starts logging the query execution.
-  def startLogging(query: String): LogState = {
-    val sources = extractSourceTables(query).mkString(", ")
+  // Форматирование длительности
+  private def formatDuration(durationMs: Long): String = {
+    val totalSeconds = durationMs / 1000
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+    s"${hours}ч ${minutes}м ${seconds}с"
+  }
 
+  // This method starts logging the query execution.
+  def startLogging(queryId: String, groupId: String, query: String): LogState = {
+    val sources = extractSourceTables(query).mkString(", ")
+    val startTime = System.currentTimeMillis()
     LogState(
-      queryId = query,
+      queryId = queryId,
+      groupId = groupId,
       sources = sources,
-      startDate = currentDateTime,
+      startDate = formatTime(startTime),
       appId = spark.sparkContext.applicationId,
-      dtFrom = currentDate
+      dtFrom = formatDate(startTime)
     )
   }
 
   // This method ends logging the query execution.
   def endLogging(state: LogState, status: String, message: String): Unit = {
-    val endDate = currentDateTime
-    val duration = calculateDuration(state.startDate, endDate)
+    val endTime = System.currentTimeMillis()
+    val durationMs = endTime - LocalDateTime.parse(state.startDate, dateTimeFormatter).toInstant(java.time.ZoneOffset.UTC).toEpochMilli
+
+    val durationFormatted = formatDuration(durationMs)
 
     val log = QueryLog(
       appId = state.appId,
       queryId = state.queryId,
+      groupId = state.groupId,
       appName = spark.sparkContext.appName,
       startDate = state.startDate,
-      endDate = endDate,
+      endDate = formatTime(endTime),
       status = status,
       message = message,
       sources = state.sources,
       dtFrom = state.dtFrom,
-      duration = duration
+      duration = durationFormatted
     )
 
     addLog(log)
@@ -116,6 +116,7 @@ class QueryLogger(spark: SparkSession) {
       Row(
         log.appId,
         log.queryId,
+        log.groupId,
         log.appName,
         log.startDate,
         log.endDate,
@@ -131,22 +132,5 @@ class QueryLogger(spark: SparkSession) {
     val df = spark.createDataFrame(spark.sparkContext.parallelize(rows), schema)
 
     df.show(truncate = false)
-  }
-
-  // This method is a placeholder for the actual query execution.
-  def logQueryProcess(
-                       queryId: String,
-                       sqlTemplate: String,
-                       jsonConfig: QueryParamsConfig
-                     )(process: (String, String, QueryParamsConfig) => Unit): Unit = {
-    val logState = startLogging(queryId)
-    Try {
-      process(queryId, sqlTemplate, jsonConfig)
-    } match {
-      case Success(_) =>
-        endLogging(logState, "SUCCESS", "Query executed successfully")
-      case Failure(e) =>
-        endLogging(logState, "FAILED", s"Query failed with error: ${e.getMessage}")
-    }
   }
 }

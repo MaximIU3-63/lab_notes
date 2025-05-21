@@ -1,20 +1,80 @@
 {
   "common_params": {
-    "{db_name}": "production",
-    "{limit}": "100"
-  },
-  "dynamic_params": {
-    "{min_date}": "(select min(date) from table)"
+    "{env}": "test"
   },
   "query_specific_params": {
-    "get_users": {
-      "{schema}": "users",
-      "{status}": "active"
+    "task_001": {
+      "groupA": {
+        "params": {
+          "{table}": "groupA",
+          "{is_active}": "true"
+        }
+      },
+      "groupB": {
+        "params": {
+          "{table}": "groupB",
+          "{is_active}": "false"
+        }
+      },
+      "groupC": {
+        "params": {
+          "{table}": "groupC",
+          "{is_active}": "true"
+        }
+      }
+    },
+    "task_002": {
+      "groupA": {
+        "params": {
+          "{table}": "groupA",
+          "{status}": "pending",
+          "{date}": "2024"
+        }
+      },
+      "groupB": {
+        "params": {
+          "{table}": "groupB",
+          "{status}": "failed",
+          "{date}": "2024"
+        }
+      },
+      "groupC": {
+        "params": {
+          "{table}": "groupC",
+          "{status}": "success",
+          "{date}": "2024"
+        }
+      }
+    },
+    "cp_id_1": {
+      "akb": {
+        "params": {
+          "{schema}": "akb",
+          "{status}": "active"
+        }
+      },
+      "chat": {
+        "params": {
+          "{schema}": "chat",
+          "{status}": "active"
+        }
+      }
     },
     "get_orders": {
-      "{schema}": "orders",
-      "{status}": "active",
-      "{date}": "2024-01-01"
+      "akb": {
+        "params": {
+          "{schema}": "akb",
+          "{status}": "active",
+          "{date}": "2024"
+        }
+      },
+      "chat": {
+        "params": {
+          "{schema}": "chat",
+          "{status}": "inactive",
+          "{date}": "2024"
+        }
+      }
     }
   }
 }

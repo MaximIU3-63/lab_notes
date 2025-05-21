@@ -1,0 +1,7 @@
+cp_id,group_id,query,target_table
+task_001,groupA,SELECT * FROM {env}.{table} WHERE active = {is_active},target_users_active
+task_001,groupB,SELECT * FROM {env}.{table} WHERE active = {is_active},target_users_sample
+task_001,groupC,SELECT * FROM {env}.{table} WHERE active = {is_active} and limit = 10,target_orders_count
+task_002,groupA,DROP SELECT * FROM {env}.{table} WHERE status = '{status}' and date = '{date}',target_pending_orders
+task_002,groupB,SELECT * FROM {env}.{table} WHERE status = '{status}' and date = '{date}',target_sales_summary
+task_002,groupC,SELECT * FROM {env}.{table} WHERE status = '{status}' and date = '{date}',target_available_products

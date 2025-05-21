@@ -1,9 +1,9 @@
 package reader.json
 
-import reader.json.utils.{FileType, ResourceReader}
+import reader.utils.{FileType, ResourceReader}
 
 import scala.io.Source
-import scala.util.{Try, Using}
+import scala.util.{Failure, Success, Try, Using}
 
 // Конкретный тип файла
 private case object JSON extends FileType {
@@ -29,7 +29,11 @@ class JsonReader {
   }
 
   //Вспомогательный метод
-  def readJson(resource: String): Try[String] = {
-    readFromResource[JSON.type](resource)
+  def readJson(resource: String): String = {
+    readFromResource[JSON.type](resource) match {
+      case Success(json) => json
+      case Failure(ex) =>
+        throw new RuntimeException(s"Failed to read JSON from resource: $resource", ex)
+    }
   }
 }

@@ -1,4 +1,4 @@
-package reader.json.utils
+package reader.utils
 
 // Интерфейс для чтения ресурсов
 private[reader] trait FileType {

@@ -1,4 +1,4 @@
-package reader.json.utils
+package reader.utils
 
 import scala.util.Try
 
